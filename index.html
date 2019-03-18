@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>CMPT 361 Assignment 2</title>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec3 vPosition;
+        attribute vec3 vNormal;
+        
+        uniform mat4 mat;
+        
+        varying vec3 norm;
+        varying vec3 pos;
+        varying vec3 eye;
+
+        void main()
+        {
+            norm = mat3(mat) * vNormal;
+            eye = vec3(0, 0, 10) - (mat * vec4(vPosition, 1.0)).xyz;
+        
+            // Viva la right-handed system
+            gl_Position = mat * vec4(vPosition, 1.0) * vec4(1.0, 1.0, -1.0, 1.0);
+        }
+    </script>
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        uniform vec3 lightColor;
+        uniform vec3 lightDir;
+        uniform vec3 surfaceSpec;
+        uniform vec3 ambientColor;
+        uniform vec3 surfaceDiffuse;
+        
+        uniform vec3 panning_spotlightDir;
+        uniform vec3 surfaceSpecMat;
+        uniform vec3 lightColorMat;
+        
+        varying vec3 eye;
+        varying vec3 norm;
+        varying vec3 pos;
+        
+        
+        float shininess = 10.0;
+        
+        void main()
+        {
+            // 'jawaban' simply means 'answer' in Indonesian.
+            vec3 normNorm = normalize(norm);
+            vec3 rotating_spotlightNormal = normalize(lightDir);
+            vec3 panning_spotlightDirNormal = normalize(panning_spotlightDir);
+            vec3 jawaban = ambientColor * surfaceDiffuse;
+            float diffuse = max(dot(normNorm, rotating_spotlightNormal), 0.0);
+            float diffuseMat = max(dot(normNorm, panning_spotlightDirNormal), 0.0);
+            jawaban += diffuse * lightColor * surfaceDiffuse;
+            jawaban += diffuseMat * lightColorMat * surfaceDiffuse;
+            vec3 halfVec = normalize(rotating_spotlightNormal + normalize(eye));
+            vec3 halfVecM = normalize(panning_spotlightDirNormal + normalize(eye));
+            
+            vec3 cSpec = lightColor * surfaceSpec * pow(max(dot(normNorm, halfVec), 0.0), shininess);
+            jawaban += cSpec;
+            vec3 cSpecMat = lightColorMat * surfaceSpecMat * pow(max(dot(normNorm, halfVecM), 0.0), shininess);
+            jawaban += cSpecMat;
+        
+            gl_FragColor = vec4(jawaban, 1.0);    
+        }
+    </script>
+    <script type="text/javascript" src="Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="Common/initShaders.js"></script>
+    <script type="text/javascript" src="Common/MV.js"></script>
+    <script type="text/javascript" src="bunny.js"></script>
+    <script type="text/javascript" src="shader.js"></script>
+</head>
+
+<body oncontextmenu="return false;">
+    <canvas id="gl-canvas" width="750" height="750">Please use a browser that supports Canvass</canvas>
+    <div style="display: none;">
+        <!-- These sliders are for testing purposes. -->
+        <input type="range" min="-180" max="180" value="0" step="any" id="rotation1">
+        <input type="range" min="-180" max="180" value="0" step="any" id="rotation2">
+        <input type="range" min="0.05" max="0.7" value="0.25" step="any" id="scale1">
+        <input type="range" min="-1" max="1" value="0" step="any" id="trans1">
+        <input type="range" min="-1" max="1" value="0" step="any" id="trans2">
+    </div>
+</body>
+
+</html>
+
+<style type="text/css">
+    canvas {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 800px;
+}
+</style>
