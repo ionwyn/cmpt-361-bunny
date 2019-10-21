@@ -23,7 +23,7 @@ Perhaps, the most notable acknowledgement goes to Geert Arien.  Despite giving a
 
 ## Instructions
 
-Run `index.html` on your favourite browser (except for IE).
+Clone, Run `index.html` on your favourite browser (except for IE).
 
 ## Shortcomings
 Despite understanding the principles of Blinn-Phong Lighting, I still struggle to implement it.  There was a lot of trial and error being done for the vertex and fragment shader components.
